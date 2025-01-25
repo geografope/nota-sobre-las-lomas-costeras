@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lomas Costeras | geografope</title>
+    <script src="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        const map = new maplibregl.Map({
+            container: 'map', // container id
+            style: {
+                version: 8,
+                sources: {
+                    osm: {
+                        type: "raster",
+                        tiles: ["https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"],
+                        tileSize: 256,
+                        attribution: "&copy; OpenStreetMap Contributors",
+                        maxzoom: 19,
+                    },
+                    terrainSource: {
+                        type: "raster-dem",
+                        tiles: ["./tiles/{z}/{x}/{y}.png"],
+                        tileSize: 256,
+                    },
+                },
+                layers: [
+                    {
+                        id: "osm",
+                        type: "raster",
+                        source: "osm",
+                    },
+                ],
+                terrain: {
+                    source: "terrainSource",
+                    exaggeration: 2,
+                },
+            },
+            center: [-77.09614, -12.03716],
+            zoom: 12,
+            pitch: 61,
+            bearing: 0,
+            maxPitch: 85,
+            maxZoom: 18
+        });
+
+        map.addControl(
+            new maplibregl.NavigationControl({
+                visualizePitch: true,
+                showZoom: true,
+                showCompass: true,
+            })
+        );
+
+        // Cargar el archivo lomas.geojson
+        fetch('lomas.geojson')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error al cargar el archivo GeoJSON: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Agregar la fuente GeoJSON al mapa
+                map.addSource('lomas', {
+                    type: 'geojson',
+                    data: data,
+                });
+
+                // Agregar una capa de relleno para los polígonos
+                map.addLayer({
+                    id: 'lomas-fill',
+                    type: 'fill',
+                    source: 'lomas',
+                    paint: {
+                        'fill-color': '#008000', // Verde
+                        'fill-opacity': 0.5,
+                    },
+                });
+
+                // Agregar una capa de contorno para los polígonos
+                map.addLayer({
+                    id: 'lomas-outline',
+                    type: 'line',
+                    source: 'lomas',
+                    paint: {
+                        'line-color': '#000000', // Negro
+                        'line-width': 2,
+                    },
+                });
+
+
+
+                // Agregar interactividad con popup
+                map.on('click', 'lomas-fill', (e) => {
+                    const coordinates = e.lngLat;
+                    const properties = e.features[0].properties;
+
+                    // Crear el contenido del popup con el campo NOMDIS
+                    const popupContent = `<strong>Loma:</strong> ${properties.NOMDIS}`;
+
+                    // Mostrar el popup
+                    new maplibregl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(popupContent)
+                        .addTo(map);
+                });
+
+                // Cambiar el cursor al pasar sobre las lomas
+                map.on('mouseenter', 'lomas-fill', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+
+                map.on('mouseleave', 'lomas-fill', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+            })
+            .catch(error => {
+                console.error('Error al cargar GeoJSON:', error);
+            });
+    </script>
+</body>
+
+</html>
