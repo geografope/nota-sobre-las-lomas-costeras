@@ -34,7 +34,7 @@
                         type: "raster",
                         tiles: ["https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"],
                         tileSize: 256,
-                        attribution: "&copy; OpenStreetMap Contributors",
+                        attribution: "&copy; Google Satélite",
                         maxzoom: 19,
                     },
                     terrainSource: {
@@ -67,10 +67,16 @@
             new maplibregl.NavigationControl({
                 visualizePitch: true,
                 showZoom: true,
-                showCompass: true,
+                showCompass: true
             })
         );
 
+        map.addControl(s
+            new maplibregl.TerrainControl({
+            source: 'terrainSource',
+            exaggeration: 1
+        })
+        );
         // Cargar el archivo lomas.geojson
         fetch('lomas.geojson')
             .then(response => {
