@@ -71,11 +71,11 @@
             })
         );
 
-        map.addControl(s
+        map.addControl(
             new maplibregl.TerrainControl({
-            source: 'terrainSource',
-            exaggeration: 1
-        })
+                source: 'terrainSource',
+                exaggeration: 1
+            })
         );
         // Cargar el archivo lomas.geojson
         fetch('lomas.geojson')
