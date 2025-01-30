@@ -1,1 +1,1 @@
-# note-sobre-las-lomas-costeras
+<p align="center"><a src= "https://www.linkedin.com/feed/update/urn:li:activity:7288934397817323520/"><img src="img/opinion.png" width= 250></a></p>
